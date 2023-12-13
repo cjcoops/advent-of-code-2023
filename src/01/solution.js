@@ -32,15 +32,16 @@ function getCalibrationValue(inputString) {
   const firstNumber = matches[0][0];
   const lastNumber = matches[matches.length - 1][0];
 
-  const firstNumberString = numberMap[firstNumber] ?? firstNumber;
-  const lastNumberString = numberMap[lastNumber] ?? lastNumber;
+  const calibrationValueString = `${numberMap[firstNumber] ?? firstNumber}${
+    numberMap[lastNumber] ?? lastNumber
+  }`;
 
-  return firstNumberString + lastNumberString;
+  return parseInt(calibrationValueString, 10);
 }
 
 const result = lines.reduce((prev, curr) => {
   const calibrationValue = getCalibrationValue(curr);
-  return prev + parseInt(calibrationValue, 10);
+  return prev + calibrationValue;
 }, 0);
 
 console.log(result);
