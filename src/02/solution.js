@@ -11,36 +11,63 @@ const CONFIGURATION = {
   blue: 14,
 };
 
-let result = 0;
+function solvePartOne() {
+  let result = 0;
 
-lines.forEach((line, index) => {
-  const tooManyReds = [...line.matchAll(new RegExp(/(\d+) red/, "g"))].some(
-    (match) => parseInt(match[1], 10) > CONFIGURATION.red
-  );
+  lines.forEach((line, index) => {
+    const tooManyReds = [...line.matchAll(new RegExp(/(\d+) red/, "g"))].some(
+      (match) => parseInt(match[1], 10) > CONFIGURATION.red
+    );
 
-  if (tooManyReds) {
-    return;
-  }
+    if (tooManyReds) {
+      return;
+    }
 
-  const tooManyBlue = [...line.matchAll(new RegExp(/(\d+) blue/, "g"))].some(
-    (match) => parseInt(match[1], 10) > CONFIGURATION.blue
-  );
+    const tooManyBlue = [...line.matchAll(new RegExp(/(\d+) blue/, "g"))].some(
+      (match) => parseInt(match[1], 10) > CONFIGURATION.blue
+    );
 
-  if (tooManyBlue) {
-    return;
-  }
+    if (tooManyBlue) {
+      return;
+    }
 
-  const tooManyGreen = [...line.matchAll(new RegExp(/(\d+) green/, "g"))].some(
-    (match) => parseInt(match[1], 10) > CONFIGURATION.green
-  );
+    const tooManyGreen = [
+      ...line.matchAll(new RegExp(/(\d+) green/, "g")),
+    ].some((match) => parseInt(match[1], 10) > CONFIGURATION.green);
 
-  if (tooManyGreen) {
-    return;
-  }
+    if (tooManyGreen) {
+      return;
+    }
 
-  const gameId = index + 1;
+    const gameId = index + 1;
 
-  result += parseInt(gameId, 10);
-});
+    result += parseInt(gameId, 10);
+  });
 
-console.log(result);
+  return result;
+}
+
+function solvePartTwo() {
+  let result = 0;
+
+  lines.forEach((line) => {
+    const reds = [...line.matchAll(new RegExp(/(\d+) red/, "g"))].map((match) =>
+      parseInt(match[1], 10)
+    );
+
+    const blues = [...line.matchAll(new RegExp(/(\d+) blue/, "g"))].map(
+      (match) => parseInt(match[1], 10)
+    );
+
+    const greens = [...line.matchAll(new RegExp(/(\d+) green/, "g"))].map(
+      (match) => parseInt(match[1], 10)
+    );
+
+    result += Math.max(...reds) * Math.max(...blues) * Math.max(...greens);
+  });
+
+  return result;
+}
+
+console.log("Part 1: " + solvePartOne());
+console.log("Part 2: " + solvePartTwo());
