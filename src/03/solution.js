@@ -1,21 +1,38 @@
-const path = "/example.txt";
+const path = "/input.txt";
 const file = Bun.file(import.meta.dir + path);
 
 const text = await file.text();
+
+const lines = text.split("\n");
 
 function isSymbol(value) {
   return isNaN(value) && value !== ".";
 }
 
-const schematic = text.split("\n");
+let result = 0;
 
-console.log(schematic);
+for (let i = 0; i < lines.length; i++) {
+  const numbers = lines[i];
+  for (const match of numbers.matchAll(/\d+/g)) {
+    for (let j = match.index; j < match.index + match[0].length; j++) {
+      const surrounding = [
+        (lines[i - 1] ?? "")[j - 1] ?? ".",
+        (lines[i - 1] ?? "")[j] ?? ".",
+        (lines[i - 1] ?? "")[j + 1] ?? ".",
+        (lines[i] ?? "")[j - 1] ?? ".",
+        (lines[i] ?? "")[j] ?? ".",
+        (lines[i] ?? "")[j + 1] ?? ".",
+        (lines[i + 1] ?? "")[j - 1] ?? ".",
+        (lines[i + 1] ?? "")[j] ?? ".",
+        (lines[i + 1] ?? "")[j + 1] ?? ".",
+      ];
 
-const lineIndex = 0;
-const numbers = schematic[lineIndex].matchAll(new RegExp(/\d+/g));
-console.log([...numbers].map((m) => ({ m, index: m.index })));
+      if (surrounding.some((x) => isSymbol(x))) {
+        result += parseInt(match[0]);
+        break;
+      }
+    }
+  }
+}
 
-const number = 467;
-const columnIndex = 0;
-
-console.log(schematic[1][3]);
+console.log(result);
