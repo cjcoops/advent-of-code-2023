@@ -1,4 +1,4 @@
-const path = "/example.txt";
+const path = "/input.txt";
 const file = Bun.file(import.meta.dir + path);
 
 const text = await file.text();
@@ -40,7 +40,6 @@ function solvePartOne() {
 }
 
 function solvePartTwo() {
-  let result = 0;
   const maybeGears = new Map();
 
   for (let i = 0; i < lines.length; i++) {
@@ -74,14 +73,9 @@ function solvePartTwo() {
         surrounding.forEach((x, index) => {
           if (x === "*") {
             const starIndex = surroundingIndices[index];
-            console.log(match[0], surroundingIndices[index]);
-
             const prev = maybeGears.get(starIndex);
 
-            console.log(prev);
-
             if (prev) {
-              console.log(prev);
               prev.add(match[0]);
             } else {
               maybeGears.set(starIndex, new Set([match[0]]));
@@ -92,9 +86,19 @@ function solvePartTwo() {
     }
   }
 
-  console.log(maybeGears);
+  let result = 0;
+
+  for (let [_, partNumbers] of maybeGears) {
+    if (partNumbers.size === 2) {
+      result += Array.from(partNumbers).reduce(
+        (product, partNumber) => product * partNumber,
+        1
+      );
+    }
+  }
 
   return result;
 }
 
-console.log(solvePartTwo());
+console.log("Part 1: " + solvePartOne());
+console.log("Part 2: " + solvePartTwo());
