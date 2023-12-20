@@ -1,4 +1,4 @@
-const path = "/example.txt";
+const path = "/input.txt";
 const file = Bun.file(import.meta.dir + path);
 
 const text = await file.text();
@@ -35,12 +35,11 @@ function solvePartOne() {
 }
 
 function solvePartTwo() {
-  const numberOfWinnersByCard = new Map();
   const numberOfWinnersArray = [];
 
   cards.forEach((card) => {
     const [cardAndWinners, myNumbers] = card.split("|");
-    const [cardNumber, winners] = cardAndWinners.split(":");
+    const [_, winners] = cardAndWinners.split(":");
 
     let numberOfWinners = 0;
 
@@ -50,29 +49,24 @@ function solvePartTwo() {
       }
     });
 
-    numberOfWinnersByCard.set(cardNumber, numberOfWinners ?? 0);
     numberOfWinnersArray.push(numberOfWinners);
   });
 
-  console.log(numberOfWinnersByCard);
-  console.log(numberOfWinnersArray);
   const numberOfCardsArray = new Array(cards.length).fill(1);
 
-  let result = 0;
-
-  // this needs to be recursive
   numberOfWinnersArray.forEach((cardScore, cardIndex) => {
     for (
       let index = cardIndex + 1;
       index < cardIndex + cardScore + 1;
       index++
     ) {
-      console.log(index);
-      numberOfCardsArray[index] += 1;
+      numberOfCardsArray[index] += numberOfCardsArray[cardIndex];
     }
   });
 
-  console.log(numberOfCardsArray);
+  const result = numberOfCardsArray.reduce((sum, current) => {
+    return sum + current;
+  }, 0);
 
   return result;
 }
