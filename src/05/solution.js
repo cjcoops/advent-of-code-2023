@@ -8,20 +8,18 @@ function solvePartOne() {
   const [seedsLine, ...mapStrings] = sections;
 
   function parseMap(inputString) {
-    const resultMap = new Map();
-
-    inputString.split("\n").forEach((rule) => {
-      let [destinationRangeStart, sourceRangeStart, rangeLength] = rule
+    const ranges = inputString.split("\n").map((rule) => {
+      const [destStart, sourceStart, length] = rule
         .split(" ")
         .map((value) => parseInt(value, 10));
-
-      for (let x = sourceRangeStart; x < sourceRangeStart + rangeLength; x++) {
-        resultMap.set(x, destinationRangeStart);
-        destinationRangeStart++;
-      }
+      return {
+        sourceStart,
+        sourceEnd: sourceStart + length - 1,
+        offset: destStart - sourceStart,
+      };
     });
 
-    return resultMap;
+    return ranges.sort((a, b) => a.sourceStart - b.sourceStart);
   }
 
   const mapResults = mapStrings.map((mapString) => {
@@ -29,8 +27,11 @@ function solvePartOne() {
   });
 
   function getLocationBySeed(seedNumber) {
-    return mapResults.reduce((source, map) => {
-      return map.has(source) ? map.get(source) : source;
+    return mapResults.reduce((source, ranges) => {
+      const range = ranges.find(
+        (r) => source >= r.sourceStart && source <= r.sourceEnd
+      );
+      return range ? source + range.offset : source;
     }, seedNumber);
   }
 
