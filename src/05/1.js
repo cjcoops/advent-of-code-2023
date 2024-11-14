@@ -52,7 +52,4 @@ function solvePartOne() {
   return Math.min(...locations);
 }
 
-function solvePartTwo() {}
-
 console.log("Part 1: " + solvePartOne());
-console.log("Part 2: " + solvePartTwo());
