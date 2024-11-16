@@ -4,106 +4,55 @@ const file = Bun.file(import.meta.dir + path);
 const text = await file.text();
 
 function parseInput(inputString) {
-  return inputString
-    .split("\n")
-    .map((line) => line.split(" "))
-    .map(([cards, bid]) => ({ cards, bid }));
-}
+  const [instructions, mapLines] = inputString.split("\n\n");
 
-const HAND_TYPES = {
-  FIVE_OF_A_KIND: 7,
-  FOUR_OF_A_KIND: 6,
-  FULL_HOUSE: 5,
-  THREE_OF_A_KIND: 4,
-  TWO_PAIR: 3,
-  ONE_PAIR: 2,
-  HIGH_CARD: 1,
-};
+  const map = {};
 
-const typeStrengthMap = {
-  5: HAND_TYPES.FIVE_OF_A_KIND,
-  "4,1": HAND_TYPES.FOUR_OF_A_KIND,
-  "3,2": HAND_TYPES.FULL_HOUSE,
-  "3,1,1": HAND_TYPES.THREE_OF_A_KIND,
-  "2,2,1": HAND_TYPES.TWO_PAIR,
-  "2,1,1,1": HAND_TYPES.ONE_PAIR,
-  "1,1,1,1,1": HAND_TYPES.HIGH_CARD,
-};
+  for (const line of mapLines.split("\n")) {
+    const [node, destinations] = line.split(" = ");
 
-const orderStrengthMap = {
-  A: 13,
-  K: 12,
-  Q: 11,
-  T: 10,
-  9: 9,
-  8: 8,
-  7: 7,
-  6: 6,
-  5: 5,
-  4: 4,
-  3: 3,
-  2: 2,
-  J: 1,
-};
+    const [L, R] = destinations.replace("(", "").replace(")", "").split(", ");
 
-function determineOrderStrength(hand) {
-  return hand
-    .split("")
-    .map((card) => orderStrengthMap[card])
-    .reduce((str, value) => str + value.toString().padStart(2, "0"), "");
-}
-
-function determineTypeStrength(hand) {
-  const cardCounts = {};
-  for (const card of hand) {
-    cardCounts[card] = (cardCounts[card] || 0) + 1;
+    map[node] = { L, R };
   }
 
-  if (cardCounts["J"]) {
-    const jokerCount = cardCounts["J"];
-    delete cardCounts["J"];
-
-    if (Object.keys(cardCounts).length === 0) {
-      return HAND_TYPES.FIVE_OF_A_KIND;
-    }
-
-    const mostFrequentCard = Object.entries(cardCounts).sort(
-      (a, b) => b[1] - a[1]
-    )[0][0];
-
-    cardCounts[mostFrequentCard] += jokerCount;
-  }
-
-  const counts = Object.values(cardCounts)
-    .sort((a, b) => b - a)
-    .toString();
-
-  return typeStrengthMap[counts];
+  return { instructions, map };
 }
 
-function sortHands(hands) {
-  return hands
-    .map((hand) => ({
-      ...hand,
-      typeStrength: determineTypeStrength(hand.cards),
-      orderStrength: determineOrderStrength(hand.cards),
-    }))
-    .sort((a, b) => {
-      const typeComparison = a.typeStrength - b.typeStrength;
-      return typeComparison !== 0
-        ? typeComparison
-        : a.orderStrength - b.orderStrength;
-    });
+function findCycleLength(startingNode, instructions, map) {
+  let currentNode = startingNode;
+  let steps = 0;
+
+  while (!currentNode.endsWith("Z")) {
+    const direction = instructions[steps % instructions.length];
+    currentNode = map[currentNode][direction];
+    steps++;
+  }
+
+  return steps;
+}
+
+function greatestCommonDivisor(a, b) {
+  while (b) {
+    [a, b] = [b, a % b];
+  }
+  return a;
+}
+
+function leastCommonMultiple(a, b) {
+  return (a * b) / greatestCommonDivisor(a, b);
 }
 
 function run() {
-  const parsedInput = parseInput(text);
+  const { instructions, map } = parseInput(text);
 
-  const sortedHands = sortHands(parsedInput);
+  const cycleLengths = Object.keys(map)
+    .filter((node) => node.endsWith("A"))
+    .map((node) => findCycleLength(node, instructions, map));
 
-  return sortedHands.reduce((res, hand, index) => {
-    return res + hand.bid * (index + 1);
-  }, 0);
+  return cycleLengths.reduce((acc, curr) => {
+    return leastCommonMultiple(acc, curr);
+  }, 1);
 }
 
 console.log(run());
